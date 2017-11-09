@@ -9,98 +9,123 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 	
-	var overlayCamera: UIView = UIView()
+	var captureSesssion: AVCaptureSession!
+	var cameraOutput: AVCapturePhotoOutput!
+	var previewLayer: AVCaptureVideoPreviewLayer!
+	
 	var capturedImage: UIImageView = UIImageView()
+	var previewView: UIView = UIView()
 	
-	var captureSession: AVCaptureSession?
-	var stillImageOutput: AVCaptureStillImageOutput? //AVCapturePhotoOutput
-	var previewLayer: AVCaptureVideoPreviewLayer?
-	
-	override func viewDidAppear(_ animated: Bool) {
-		super.viewDidAppear(animated)
-		previewLayer!.frame = overlayCamera.bounds
-	}
+	let shutterButton = UIButton()
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		// Do any additional setup after loading the view, typically from a nib.
-		self.overlayCamera.frame = self.view.bounds
+		
+		self.view.backgroundColor = .black
+		
+		captureSesssion = AVCaptureSession()
+		captureSesssion.sessionPreset = AVCaptureSession.Preset.photo
+		cameraOutput = AVCapturePhotoOutput()
+		
+		self.previewView.frame = self.view.bounds
 		self.capturedImage.frame = self.view.bounds
-		self.view.addSubview(self.overlayCamera)
+		self.view.addSubview(self.previewView)
 		self.view.addSubview(self.capturedImage)
-		let tapGesture = UITapGestureRecognizer(target: self, action: #selector(cameraDidTaped))
-		overlayCamera.addGestureRecognizer(tapGesture)
-	}
-	
-	override func didReceiveMemoryWarning() {
-		super.didReceiveMemoryWarning()
-		// Dispose of any resources that can be recreated.
-	}
-	
-	
-	override func viewWillAppear(_ animated: Bool) {
-		self.navigationController?.setNavigationBarHidden(true, animated: false)
-		super.viewWillAppear(animated)
 		
-		self.captureSession = AVCaptureSession()
-		guard let captureSession = self.captureSession else { return }
-		captureSession.sessionPreset = AVCaptureSession.Preset.photo
 		
-		let backCamera = AVCaptureDevice.default(for: AVMediaType.video)
+		var vmin = self.view.bounds.size.height
+		if self.view.bounds.size.width < self.view.bounds.size.height { vmin = self.view.bounds.size.width }
+		shutterButton.frame = CGRect(x: 0, y: 0, width: vmin*0.2, height: vmin*0.2)
+		shutterButton.layer.cornerRadius = vmin*0.1
+		shutterButton.layer.backgroundColor = UIColor.white.cgColor
+		shutterButton.center = CGPoint(x: self.view.bounds.size.width*0.5, y: self.view.bounds.size.height - vmin*0.1 - 10)
+		shutterButton.addTarget(self, action: #selector(shutterButtonHandler), for: .touchUpInside)
+		self.view.addSubview(shutterButton)
+
+		let device = AVCaptureDevice.default(for: .video)!
 		
-		var error: NSError?
-		var input: AVCaptureDeviceInput!
-		do {
-			input = try AVCaptureDeviceInput(device: backCamera!)
-		} catch let error1 as NSError {
-			error = error1
-			input = nil
-		}
-		
-		if error == nil && captureSession.canAddInput(input) {
-			captureSession.addInput(input)
-			
-			stillImageOutput = AVCaptureStillImageOutput()
-			stillImageOutput!.outputSettings = [AVVideoCodecKey: AVVideoCodecJPEG]
-			if captureSession.canAddOutput(stillImageOutput!) {
-				captureSession.addOutput(stillImageOutput!)
-				
-				self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-				guard let previewLayer = self.previewLayer else { return }
-				previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-				previewLayer.connection?.videoOrientation = AVCaptureVideoOrientation.portrait
-				overlayCamera.layer.addSublayer(previewLayer)
-				
-				captureSession.startRunning()
-			}
-		}
-	}
-	
-	override func viewWillDisappear(_ animated: Bool) {
-		self.navigationController?.setNavigationBarHidden(false, animated: false)
-		super.viewWillDisappear(animated)
-	}
-	
-	@objc func cameraDidTaped() {
-		
-		//		if let videoConnection = stillImageOutput!.connectionWithMediaType(AVMediaType.video) {
-		if let videoConnection = stillImageOutput!.connection(with: AVMediaType.video) {
-			videoConnection.videoOrientation = AVCaptureVideoOrientation.portrait
-			stillImageOutput?.captureStillImageAsynchronously(from: videoConnection, completionHandler: {(sampleBuffer, error) in
-				if (sampleBuffer != nil) {
-					let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sampleBuffer!)
-					let dataProvider = CGDataProvider(data: imageData! as CFData)
-					
-					let cgImageRef = CGImage(jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true, intent: CGColorRenderingIntent.defaultIntent)
-					
-					let image = UIImage(cgImage: cgImageRef!, scale: 1.0, orientation: UIImageOrientation.right)
-					self.capturedImage.image = image
+		if let input = try? AVCaptureDeviceInput(device: device) {
+			if (captureSesssion.canAddInput(input)) {
+				captureSesssion.addInput(input)
+				if (captureSesssion.canAddOutput(cameraOutput)) {
+					captureSesssion.addOutput(cameraOutput)
+					previewLayer = AVCaptureVideoPreviewLayer(session: captureSesssion)
+					previewLayer.frame = self.view.bounds //previewView.bounds
+					previewView.layer.addSublayer(previewLayer)
+					captureSesssion.startRunning()
 				}
-			})
+			} else {
+				print("issue here : captureSesssion.canAddInput")
+			}
+		} else {
+			print("some problem here")
+		}
+	}
+	
+	@objc func shutterButtonHandler(_ sender: UIButton) {
+		let settings = AVCapturePhotoSettings()
+		let previewPixelType = settings.availablePreviewPhotoPixelFormatTypes.first!
+		let previewFormat = [
+			kCVPixelBufferPixelFormatTypeKey as String: previewPixelType,
+			kCVPixelBufferWidthKey as String: 160,
+			kCVPixelBufferHeightKey as String: 160
+		]
+		settings.previewPhotoFormat = previewFormat
+		cameraOutput.capturePhoto(with: settings, delegate: self)
+	}
+	
+	// callBack from take picture
+	func photoOutput(_ captureOutput: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
+		
+		if let error = error {
+			print("error: \(error.localizedDescription)")
+		}
+		
+		if  let sampleBuffer = photoSampleBuffer,
+			let previewBuffer = previewPhotoSampleBuffer,
+			let dataImage =  AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer:  sampleBuffer, previewPhotoSampleBuffer: previewBuffer) {
+			print(UIImage(data: dataImage)?.size as Any)
+			
+			let dataProvider = CGDataProvider(data: dataImage as CFData)
+			let cgImageRef: CGImage! = CGImage(jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
+			let image = UIImage(cgImage: cgImageRef, scale: 1.0, orientation: UIImageOrientation.right)
+			
+			self.capturedImage.image = image
+		} else {
+			print("some error here")
+		}
+	}
+	
+	func askPermission() {
+		let cameraPermissionStatus =  AVCaptureDevice.authorizationStatus(for: .video)
+		switch cameraPermissionStatus {
+//		case .authorized:
+//		case .restricted:
+		case .denied:
+			let alert = UIAlertController(title: "Camera Permissions" , message: "This app requires access to the camera",  preferredStyle: .alert)
+			let action = UIAlertAction(title: "Ok", style: .cancel,  handler: nil)
+			alert.addAction(action)
+			present(alert, animated: true, completion: nil)
+		default:
+			AVCaptureDevice.requestAccess(for: .video, completionHandler: {
+				[weak self]
+				(granted:Bool) -> Void in
+				if granted == true {
+					// user granted access
+					DispatchQueue.main.async(){ }
+				}
+				else {
+					// user rejected access
+					DispatchQueue.main.async(){
+						let alert = UIAlertController(title: "Sorry" , message: "This app cannot work without access to the camera", preferredStyle: .alert)
+						let action = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
+						alert.addAction(action)
+						self?.present(alert, animated: true, completion: nil)
+					}
+				}
+			});
 		}
 	}
 }
-
-
