@@ -10,11 +10,16 @@ import UIKit
 import AVFoundation
 import Photos
 
-class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+protocol FrameExtractorDelegate: class {
+	func captured(image: UIImage)
+}
+
+class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, AVCaptureVideoDataOutputSampleBufferDelegate{
 	
-	var captureSesssion: AVCaptureSession!
+	var captureSession: AVCaptureSession!
 	var cameraOutput: AVCapturePhotoOutput!
 	var previewLayer: AVCaptureVideoPreviewLayer!
+	var dataOutput: AVCaptureVideoDataOutput!
 	
 	var capturedImage: UIImageView = UIImageView()
 	var previewView: UIView = UIView()
@@ -32,14 +37,25 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 	
 	var focusSquare: CameraFocusSquare?
 	
+	let context = CIContext()
+	var delegate: FrameExtractorDelegate?
+	
+	let newSessionButton = UIButton()
+	
+	let firstLastButton = UIButton()
+	var firstLast:Bool = true
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
-		self.view.backgroundColor = .black
+		self.view.backgroundColor = UIColor.init(white: 0.1, alpha: 1.0)
 		
-		captureSesssion = AVCaptureSession()
-		captureSesssion.sessionPreset = AVCaptureSession.Preset.photo
-		cameraOutput = AVCapturePhotoOutput()
+		self.captureSession = AVCaptureSession()
+		self.captureSession.sessionPreset = AVCaptureSession.Preset.photo
+		self.cameraOutput = AVCapturePhotoOutput()
+		
+//		self.dataOutput = AVCaptureVideoDataOutput()
+		
 		
 		self.previewView.frame = self.view.bounds
 		self.capturedImage.frame = self.view.bounds
@@ -64,7 +80,7 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 		shutterOutlineWhite.layer.backgroundColor = UIColor.white.cgColor
 		shutterOutlineBlack.layer.backgroundColor = UIColor.black.cgColor
 
-		let buttonCenter = CGPoint(x: self.view.bounds.size.width*0.5, y: self.view.bounds.size.height - vmin*0.1 - 10)
+		let buttonCenter = CGPoint(x: self.view.bounds.size.width*0.5, y: self.view.bounds.size.height - vmin*0.1 - 15)
 		shutterOutlineBlack.center = buttonCenter
 		shutterOutlineWhite.center = buttonCenter
 		shutterButton.center = buttonCenter
@@ -84,18 +100,45 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 		self.photoAlbumButton.backgroundColor = .clear
 		self.photoAlbumButton.addTarget(self, action: #selector(photoAlbumHandler), for: .touchUpInside)
 		self.view.addSubview(photoAlbumButton)
-
+		
+		self.newSessionButton.setImage(UIImage(named:"Plus"), for: .normal)
+		self.newSessionButton.addTarget(self, action: #selector(newSessionHandler), for: .touchUpInside)
+		self.newSessionButton.frame = CGRect(x: 0, y: 0, width: vmin*0.08, height: vmin*0.08)
+		self.newSessionButton.center = CGPoint(x: self.view.frame.size.width*0.15, y: -5+vmin*0.08)
+		self.view.addSubview(newSessionButton)
+		
+		self.firstLastButton.setTitle("last", for: .normal)
+		self.firstLastButton.setTitleColor(.white, for: .normal)
+		self.firstLastButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
+		self.firstLastButton.sizeToFit()
+		self.firstLastButton.center = CGPoint(x: self.view.frame.size.width*0.85, y: -5+vmin*0.08)
+		self.firstLastButton.addTarget(self, action: #selector(firstLastHandler), for: .touchUpInside)
+		self.view.addSubview(self.firstLastButton)
+		
 		let device = AVCaptureDevice.default(for: .video)!
 		
 		if let input = try? AVCaptureDeviceInput(device: device) {
-			if (captureSesssion.canAddInput(input)) {
-				captureSesssion.addInput(input)
-				if (captureSesssion.canAddOutput(cameraOutput)) {
-					captureSesssion.addOutput(cameraOutput)
-					previewLayer = AVCaptureVideoPreviewLayer(session: captureSesssion)
+			if (captureSession.canAddInput(input)) {
+				captureSession.addInput(input)
+				if (captureSession.canAddOutput(cameraOutput)) {
+					captureSession.addOutput(cameraOutput)
+					previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+					
 					previewLayer.frame = previewView.bounds
 					previewView.layer.addSublayer(previewLayer)
-					captureSesssion.startRunning()
+					captureSession.startRunning()
+					
+					////////////////////////////////////////////
+					self.dataOutput = AVCaptureVideoDataOutput()
+					dataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "sample buffer"))
+					guard captureSession.canAddOutput(dataOutput) else { return }
+					captureSession.addOutput(dataOutput)
+					guard let connection = dataOutput.connection(with: AVFoundation.AVMediaType.video) else { return }
+					guard connection.isVideoOrientationSupported else { return }
+					guard connection.isVideoMirroringSupported else { return }
+					connection.videoOrientation = .portrait
+//					connection.isVideoMirrored =
+					print("made it here")
 				}
 			} else {
 				print("issue here: captureSesssion.canAddInput")
@@ -120,6 +163,19 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 		self.view.addGestureRecognizer(tapGesture)
 	}
 	
+	@objc func newSessionHandler(){
+		self.capturedImage.image = nil
+	}
+	
+	@objc func firstLastHandler(){
+		self.firstLast = !self.firstLast
+		if self.firstLast{
+			self.firstLastButton.setTitle("last", for: .normal)
+		}else{
+			self.firstLastButton.setTitle("first", for: .normal)
+		}
+	}
+	
 	@objc func photoAlbumHandler(){
 		self.present(picker, animated: true, completion: nil)
 	}
@@ -132,6 +188,23 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 				self.capturedImage.image = image
 				self.photoAlbum.image = image
 			}
+		}
+	}
+	
+	// MARK: Sample buffer to UIImage conversion
+	private func imageFromSampleBuffer(sampleBuffer: CMSampleBuffer) -> UIImage? {
+		guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return nil }
+		let ciImage = CIImage(cvPixelBuffer: imageBuffer)
+		guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return nil }
+		return UIImage(cgImage: cgImage)
+	}
+	
+	// MARK: AVCaptureVideoDataOutputSampleBufferDelegate
+	func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
+		print("ths thing")
+		guard let uiImage = imageFromSampleBuffer(sampleBuffer: sampleBuffer) else { return }
+		DispatchQueue.main.async { [unowned self] in
+			self.delegate?.captured(image: uiImage)
 		}
 	}
 	
@@ -177,7 +250,9 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 			let cgImageRef: CGImage! = CGImage(jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
 			let image = UIImage(cgImage: cgImageRef, scale: 1.0, orientation: .right)
 			
-			self.capturedImage.image = image
+			if firstLast || self.capturedImage.image == nil{
+				self.capturedImage.image = image
+			}
 			UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
 
 		} else {
