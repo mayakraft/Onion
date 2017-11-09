@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import Photos
 
 class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 	
@@ -22,6 +23,8 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 	let shutterOutlineBlack = UIView()
 	let shutterOutlineWhite = UIView()
 	
+	let photoAlbum = UIImageView()
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
@@ -33,14 +36,17 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 		
 		self.previewView.frame = self.view.bounds
 		self.capturedImage.frame = self.view.bounds
+		self.previewView.center = CGPoint(x: self.view.center.x, y: self.view.center.y-30)
+		self.capturedImage.center = CGPoint(x: self.view.center.x, y: self.view.center.y-30)
 		self.view.addSubview(self.previewView)
 		self.view.addSubview(self.capturedImage)
 		
 		self.capturedImage.contentMode = .scaleAspectFit
 		self.capturedImage.alpha = 0.3
-
+		
 		var vmin = self.view.bounds.size.height
 		if self.view.bounds.size.width < self.view.bounds.size.height { vmin = self.view.bounds.size.width }
+
 		shutterButton.frame = CGRect(x: 0, y: 0, width: vmin*0.2, height: vmin*0.2)
 		shutterButton.layer.cornerRadius = vmin*0.1
 		shutterButton.layer.backgroundColor = UIColor.white.cgColor
@@ -60,6 +66,13 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 		self.view.addSubview(shutterOutlineBlack)
 		self.view.addSubview(shutterButton)
 
+		self.photoAlbum.frame = CGRect(x: 0, y: 0, width: vmin*0.2, height: vmin*0.2)
+//		self.photoAlbum.center = CGPoint(x: vmin*0.1 + 4, y: self.view.bounds.size.height - vmin*0.1 - 4)
+		self.photoAlbum.center = CGPoint(x: vmin*0.1 + 4, y: buttonCenter.y)
+		self.photoAlbum.contentMode = .scaleAspectFill
+		self.photoAlbum.clipsToBounds = true
+		self.view.addSubview(self.photoAlbum)
+
 		let device = AVCaptureDevice.default(for: .video)!
 		
 		if let input = try? AVCaptureDeviceInput(device: device) {
@@ -73,10 +86,32 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 					captureSesssion.startRunning()
 				}
 			} else {
-				print("issue here : captureSesssion.canAddInput")
+				print("issue here: captureSesssion.canAddInput")
 			}
 		} else {
-			print("some problem here")
+			print("problem")
+		}
+		
+		//////////////////////////////////////
+		
+		getLastPhoto { (image) in
+			self.photoAlbum.image = image
+		}
+	}
+	
+	func getLastPhoto(_ completionHandler:@escaping (UIImage) -> ()){
+		let fetchOptions = PHFetchOptions()
+		fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+		fetchOptions.fetchLimit = 1
+		let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+		if let asset = fetchResult.firstObject {
+			let manager = PHImageManager.default()
+			let targetSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+			manager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFit, options: nil, resultHandler: { (image, info) in
+				if let yesImage = image{
+					completionHandler(yesImage)
+				}
+			})
 		}
 	}
 	
@@ -92,7 +127,6 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 		cameraOutput.capturePhoto(with: settings, delegate: self)
 	}
 	
-	// callBack from take picture
 	func photoOutput(_ captureOutput: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
 		
 		if let error = error {
@@ -108,11 +142,19 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 			let image = UIImage(cgImage: cgImageRef, scale: 1.0, orientation: .right)
 			
 			self.capturedImage.image = image
+			UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+
 		} else {
-			print("some error here")
+			print("error")
 		}
 	}
-	
+
+	@objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
+		getLastPhoto { (image) in
+			self.photoAlbum.image = image
+		}
+	}
+
 	func askPermission() {
 		let cameraPermissionStatus =  AVCaptureDevice.authorizationStatus(for: .video)
 		switch cameraPermissionStatus {

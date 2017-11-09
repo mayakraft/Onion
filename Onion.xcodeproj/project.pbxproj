@@ -48,6 +48,7 @@
 		D5BCF55D1FB3D6700057220F /* OnionUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnionUITests.swift; sourceTree = "<group>"; };
 		D5BCF55F1FB3D6700057220F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D5BCF56C1FB3D6EF0057220F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		D5BCF56D1FB3F9A60057220F /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +131,7 @@
 		D5BCF56B1FB3D6EE0057220F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D5BCF56D1FB3F9A60057220F /* Photos.framework */,
 				D5BCF56C1FB3D6EF0057220F /* AVFoundation.framework */,
 			);
 			name = Frameworks;
