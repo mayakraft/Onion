@@ -19,6 +19,8 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 	var previewView: UIView = UIView()
 	
 	let shutterButton = UIButton()
+	let shutterOutlineBlack = UIView()
+	let shutterOutlineWhite = UIView()
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -34,14 +36,28 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 		self.view.addSubview(self.previewView)
 		self.view.addSubview(self.capturedImage)
 		
-		
+		self.capturedImage.contentMode = .scaleAspectFit
+		self.capturedImage.alpha = 0.3
+
 		var vmin = self.view.bounds.size.height
 		if self.view.bounds.size.width < self.view.bounds.size.height { vmin = self.view.bounds.size.width }
 		shutterButton.frame = CGRect(x: 0, y: 0, width: vmin*0.2, height: vmin*0.2)
 		shutterButton.layer.cornerRadius = vmin*0.1
 		shutterButton.layer.backgroundColor = UIColor.white.cgColor
-		shutterButton.center = CGPoint(x: self.view.bounds.size.width*0.5, y: self.view.bounds.size.height - vmin*0.1 - 10)
+		shutterOutlineWhite.frame = CGRect(x: 0, y: 0, width: vmin*0.2+20, height: vmin*0.2+20)
+		shutterOutlineBlack.frame = CGRect(x: 0, y: 0, width: vmin*0.2+8, height: vmin*0.2+8)
+		shutterOutlineWhite.layer.cornerRadius = vmin*0.1+10
+		shutterOutlineBlack.layer.cornerRadius = vmin*0.1+4
+		shutterOutlineWhite.layer.backgroundColor = UIColor.white.cgColor
+		shutterOutlineBlack.layer.backgroundColor = UIColor.black.cgColor
+
+		let buttonCenter = CGPoint(x: self.view.bounds.size.width*0.5, y: self.view.bounds.size.height - vmin*0.1 - 10)
+		shutterOutlineBlack.center = buttonCenter
+		shutterOutlineWhite.center = buttonCenter
+		shutterButton.center = buttonCenter
 		shutterButton.addTarget(self, action: #selector(shutterButtonHandler), for: .touchUpInside)
+		self.view.addSubview(shutterOutlineWhite)
+		self.view.addSubview(shutterOutlineBlack)
 		self.view.addSubview(shutterButton)
 
 		let device = AVCaptureDevice.default(for: .video)!
@@ -52,7 +68,7 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 				if (captureSesssion.canAddOutput(cameraOutput)) {
 					captureSesssion.addOutput(cameraOutput)
 					previewLayer = AVCaptureVideoPreviewLayer(session: captureSesssion)
-					previewLayer.frame = self.view.bounds //previewView.bounds
+					previewLayer.frame = previewView.bounds
 					previewView.layer.addSublayer(previewLayer)
 					captureSesssion.startRunning()
 				}
@@ -85,12 +101,11 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 		
 		if  let sampleBuffer = photoSampleBuffer,
 			let previewBuffer = previewPhotoSampleBuffer,
-			let dataImage =  AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer:  sampleBuffer, previewPhotoSampleBuffer: previewBuffer) {
-			print(UIImage(data: dataImage)?.size as Any)
+			let dataImage = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: sampleBuffer, previewPhotoSampleBuffer: previewBuffer) {
 			
 			let dataProvider = CGDataProvider(data: dataImage as CFData)
 			let cgImageRef: CGImage! = CGImage(jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
-			let image = UIImage(cgImage: cgImageRef, scale: 1.0, orientation: UIImageOrientation.right)
+			let image = UIImage(cgImage: cgImageRef, scale: 1.0, orientation: .right)
 			
 			self.capturedImage.image = image
 		} else {
