@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D5B007C81FB4B149000B160F /* CameraFocusSquare.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */; };
 		D5BCF53E1FB3D6700057220F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BCF53D1FB3D6700057220F /* AppDelegate.swift */; };
 		D5BCF5401FB3D6700057220F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BCF53F1FB3D6700057220F /* ViewController.swift */; };
 		D5BCF5431FB3D6700057220F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D5BCF5411FB3D6700057220F /* Main.storyboard */; };
@@ -34,6 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFocusSquare.swift; sourceTree = "<group>"; };
 		D5BCF53A1FB3D6700057220F /* Onion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Onion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5BCF53D1FB3D6700057220F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D5BCF53F1FB3D6700057220F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 			children = (
 				D5BCF53D1FB3D6700057220F /* AppDelegate.swift */,
 				D5BCF53F1FB3D6700057220F /* ViewController.swift */,
+				D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */,
 				D5BCF5411FB3D6700057220F /* Main.storyboard */,
 				D5BCF5441FB3D6700057220F /* Assets.xcassets */,
 				D5BCF5461FB3D6700057220F /* LaunchScreen.storyboard */,
@@ -272,6 +275,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D5BCF5401FB3D6700057220F /* ViewController.swift in Sources */,
+				D5B007C81FB4B149000B160F /* CameraFocusSquare.swift in Sources */,
 				D5BCF53E1FB3D6700057220F /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

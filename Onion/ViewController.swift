@@ -28,6 +28,10 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 	
 	let picker = UIImagePickerController()
 	
+	let tapGesture = UITapGestureRecognizer()
+	
+	var focusSquare: CameraFocusSquare?
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
@@ -111,6 +115,9 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 		picker.sourceType = .savedPhotosAlbum
 //		picker.allowsEditing = true
 		picker.delegate = self
+		
+		tapGesture.addTarget(self, action: #selector(tapToFocus(_:)))
+		self.view.addGestureRecognizer(tapGesture)
 	}
 	
 	@objc func photoAlbumHandler(){
@@ -181,6 +188,39 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePi
 	@objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
 		getLastPhoto { (image) in
 			self.photoAlbum.image = image
+		}
+	}
+	
+	///////////////////////////////////////////////////////////////
+	
+	@objc func tapToFocus(_ gesture : UITapGestureRecognizer) {
+		let touchPoint:CGPoint = gesture.location(in: self.previewView)
+		if let fsquare = self.focusSquare {
+			fsquare.updatePoint(touchPoint)
+		}else{
+			self.focusSquare = CameraFocusSquare(touchPoint: touchPoint)
+			self.previewView.addSubview(self.focusSquare!)
+			self.focusSquare?.setNeedsDisplay()
+		}
+		
+		self.focusSquare?.animateFocusingAction()
+		let convertedPoint:CGPoint = self.previewLayer!.captureDevicePointConverted(fromLayerPoint: touchPoint)
+		let currentDevice:AVCaptureDevice = AVCaptureDevice.default(for: .video)!
+		if currentDevice.isFocusPointOfInterestSupported && currentDevice.isFocusModeSupported(AVCaptureDevice.FocusMode.autoFocus){
+			do {
+				try currentDevice.lockForConfiguration()
+				currentDevice.focusPointOfInterest = convertedPoint
+				currentDevice.focusMode = AVCaptureDevice.FocusMode.autoFocus
+				
+				if currentDevice.isExposureModeSupported(AVCaptureDevice.ExposureMode.continuousAutoExposure){
+					currentDevice.exposureMode = AVCaptureDevice.ExposureMode.continuousAutoExposure
+				}
+				currentDevice.isSubjectAreaChangeMonitoringEnabled = true
+				currentDevice.unlockForConfiguration()
+				
+			} catch {
+				
+			}
 		}
 	}
 
