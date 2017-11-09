@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 import Photos
 
-class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
+class ViewController: UIViewController, AVCapturePhotoCaptureDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate{
 	
 	var captureSesssion: AVCaptureSession!
 	var cameraOutput: AVCapturePhotoOutput!
@@ -24,6 +24,9 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 	let shutterOutlineWhite = UIView()
 	
 	let photoAlbum = UIImageView()
+	let photoAlbumButton = UIButton()
+	
+	let picker = UIImagePickerController()
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -72,6 +75,11 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 		self.photoAlbum.contentMode = .scaleAspectFill
 		self.photoAlbum.clipsToBounds = true
 		self.view.addSubview(self.photoAlbum)
+		
+		self.photoAlbumButton.frame = self.photoAlbum.frame
+		self.photoAlbumButton.backgroundColor = .clear
+		self.photoAlbumButton.addTarget(self, action: #selector(photoAlbumHandler), for: .touchUpInside)
+		self.view.addSubview(photoAlbumButton)
 
 		let device = AVCaptureDevice.default(for: .video)!
 		
@@ -96,6 +104,27 @@ class ViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 		
 		getLastPhoto { (image) in
 			self.photoAlbum.image = image
+		}
+		
+		//////////////////////////////////////
+		
+		picker.sourceType = .savedPhotosAlbum
+//		picker.allowsEditing = true
+		picker.delegate = self
+	}
+	
+	@objc func photoAlbumHandler(){
+		self.present(picker, animated: true, completion: nil)
+	}
+	
+	func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+		print("got an image")
+		picker.dismiss(animated: true) {
+			print(info)
+			if let image = info["UIImagePickerControllerOriginalImage"] as? UIImage{
+				self.capturedImage.image = image
+				self.photoAlbum.image = image
+			}
 		}
 	}
 	
