@@ -47,6 +47,7 @@
 		D5BCF5591FB3D6700057220F /* OnionUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OnionUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5BCF55D1FB3D6700057220F /* OnionUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnionUITests.swift; sourceTree = "<group>"; };
 		D5BCF55F1FB3D6700057220F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D5BCF56C1FB3D6EF0057220F /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +82,7 @@
 				D5BCF5511FB3D6700057220F /* OnionTests */,
 				D5BCF55C1FB3D6700057220F /* OnionUITests */,
 				D5BCF53B1FB3D6700057220F /* Products */,
+				D5BCF56B1FB3D6EE0057220F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -123,6 +125,14 @@
 				D5BCF55F1FB3D6700057220F /* Info.plist */,
 			);
 			path = OnionUITests;
+			sourceTree = "<group>";
+		};
+		D5BCF56B1FB3D6EE0057220F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D5BCF56C1FB3D6EF0057220F /* AVFoundation.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -429,6 +439,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 78C98TD784;
 				INFOPLIST_FILE = Onion/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.robbykraft.Onion;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -444,6 +455,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 78C98TD784;
 				INFOPLIST_FILE = Onion/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.robbykraft.Onion;
 				PRODUCT_NAME = "$(TARGET_NAME)";
