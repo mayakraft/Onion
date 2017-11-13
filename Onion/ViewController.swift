@@ -10,7 +10,7 @@ import UIKit
 import AVFoundation
 import Photos
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, FrameExtractorDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, VideoFeedDelegate {
 	
 	var previewView = UIView()
 	var overlayImageView = UIImageView()
@@ -36,7 +36,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	var cvFullScreen:Bool = false
 	
 	var focusSquare: CameraFocusSquare?
-	var frameExtractor:FrameExtractor!
+	var videoFeed:VideoFeed!
 	
 	let openCV = OpenCVWrapper()
 
@@ -61,6 +61,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		var vmin = self.view.bounds.size.height
 		if self.view.bounds.size.width < self.view.bounds.size.height { vmin = self.view.bounds.size.width }
+		let shutterW = vmin*0.2+20
 
 		shutterButton.frame = CGRect(x: 0, y: 0, width: vmin*0.2, height: vmin*0.2)
 		shutterButton.layer.cornerRadius = vmin*0.1
@@ -81,9 +82,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		self.view.addSubview(shutterOutlineBlack)
 		self.view.addSubview(shutterButton)
 
-		self.photoAlbumView.frame = CGRect(x: 0, y: 0, width: vmin*0.2, height: vmin*0.2)
-//		self.photoAlbumView.center = CGPoint(x: vmin*0.1 + 4, y: self.view.bounds.size.height - vmin*0.1 - 4)
-		self.photoAlbumView.center = CGPoint(x: vmin*0.1 + 4, y: buttonCenter.y)
+		self.photoAlbumView.frame = CGRect(x: 0, y: 0, width: (vmin-shutterW-16)*0.5, height: shutterW)
+		self.photoAlbumView.center = CGPoint(x: 4+(vmin-shutterW-16)*0.25, y: buttonCenter.y)
 		self.photoAlbumView.contentMode = .scaleAspectFit
 		self.photoAlbumView.clipsToBounds = true
 		self.view.addSubview(self.photoAlbumView)
@@ -93,8 +93,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		self.photoAlbumButton.addTarget(self, action: #selector(photoAlbumHandler), for: .touchUpInside)
 		self.view.addSubview(photoAlbumButton)
 
-		self.cvImageView.frame = CGRect(x: 0, y: 0, width: vmin*0.2, height: vmin*0.2)
-		self.cvImageView.center = CGPoint(x: self.view.bounds.width - vmin*0.1 + 4, y: buttonCenter.y)
+		self.cvImageView.frame = CGRect(x: 0, y: 0, width: (vmin-shutterW-16)*0.5, height: shutterW)
+		self.cvImageView.center = CGPoint(x: vmin-(4+(vmin-shutterW-16)*0.25), y: buttonCenter.y)
 		self.cvImageView.contentMode = .scaleAspectFit
 		self.cvImageView.clipsToBounds = true
 		self.view.addSubview(self.cvImageView)
@@ -140,11 +140,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		//////////////////////////////////////
 		// setup camera device
 		
-		self.frameExtractor = FrameExtractor()
-		self.frameExtractor.delegate = self
+		self.videoFeed = VideoFeed()
+		self.videoFeed.delegate = self
 		
-		self.frameExtractor.previewLayer.frame = previewView.bounds
-		previewView.layer.addSublayer(self.frameExtractor.previewLayer)
+		self.videoFeed.previewLayer.frame = previewView.bounds
+		previewView.layer.addSublayer(self.videoFeed.previewLayer)
 
 	}
 	
@@ -166,8 +166,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	
 	func frame(image: UIImage) {
 		if let comparison = self.comparisonImage{
-			let comparisonUp = removeRotationForImage(image: comparison)
-			let difference = openCV.differenceBetween(image, and: comparisonUp)
+			let difference = openCV.difference(withStoredImage: image)
+//			let comparisonUp = removeRotationForImage(image: comparison)
+//			let difference = openCV.differenceBetween(image, and: comparisonUp)
 			if(cvFullScreen){
 				self.overlayImageView.image = difference
 				self.cvImageView.image = image
@@ -180,6 +181,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	}
 	
 	func captured(image: UIImage) {
+		openCV.storedImage = removeRotationForImage(image: image)
 		self.comparisonImage = image
 		if firstLast || self.overlayImageView.image == nil{
 			self.overlayImageView.image = image
@@ -201,7 +203,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	}
 	
 	@objc func shutterButtonHandler(_ sender: UIButton) {
-		self.frameExtractor.takePhoto()
+		self.videoFeed.takePhoto()
 	}
 	
 	@objc func photoAlbumHandler(){
@@ -223,6 +225,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		picker.dismiss(animated: true) {
 			print(info)
 			if let image = info["UIImagePickerControllerOriginalImage"] as? UIImage{
+				self.openCV.storedImage = self.removeRotationForImage(image: image)
 				self.comparisonImage = image
 				self.overlayImageView.image = image
 				self.photoAlbumView.image = image
@@ -264,7 +267,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		}
 
 		self.focusSquare?.animateFocusingAction()
-		let convertedPoint:CGPoint = frameExtractor.previewLayer.captureDevicePointConverted(fromLayerPoint: touchPoint)
+		let convertedPoint:CGPoint = videoFeed.previewLayer.captureDevicePointConverted(fromLayerPoint: touchPoint)
 		let currentDevice:AVCaptureDevice = AVCaptureDevice.default(for: .video)!
 		if currentDevice.isFocusPointOfInterestSupported && currentDevice.isFocusModeSupported(AVCaptureDevice.FocusMode.autoFocus){
 			do {

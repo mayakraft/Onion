@@ -11,8 +11,11 @@
 
 @interface OpenCVWrapper : NSObject
 
-
 - (UIImage *) makeGray: (UIImage *) image;
+
+@property (nonatomic) UIImage* storedImage;
+-(UIImage *) differenceWithStoredImage:(UIImage*)image;
+
 
 -(UIImage *) differenceBetween:(UIImage*)image1 and:(UIImage*)image2;
 

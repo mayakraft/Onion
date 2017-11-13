@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		D58DFD921FB9EFE900D3C625 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D58DFD911FB9EFE900D3C625 /* opencv2.framework */; };
 		D58DFD961FBA2D3200D3C625 /* OpenCVWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = D58DFD951FBA2D3200D3C625 /* OpenCVWrapper.mm */; };
-		D59736F71FB6129F00FC99F2 /* FrameExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59736F61FB6129F00FC99F2 /* FrameExtractor.swift */; };
+		D59736F71FB6129F00FC99F2 /* VideoFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59736F61FB6129F00FC99F2 /* VideoFeed.swift */; };
 		D5B007C81FB4B149000B160F /* CameraFocusSquare.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */; };
 		D5BCF53E1FB3D6700057220F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BCF53D1FB3D6700057220F /* AppDelegate.swift */; };
 		D5BCF5401FB3D6700057220F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BCF53F1FB3D6700057220F /* ViewController.swift */; };
@@ -42,7 +42,7 @@
 		D58DFD931FBA2D3100D3C625 /* Onion-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Onion-Bridging-Header.h"; sourceTree = "<group>"; };
 		D58DFD941FBA2D3200D3C625 /* OpenCVWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OpenCVWrapper.h; sourceTree = "<group>"; };
 		D58DFD951FBA2D3200D3C625 /* OpenCVWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = OpenCVWrapper.mm; sourceTree = "<group>"; };
-		D59736F61FB6129F00FC99F2 /* FrameExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameExtractor.swift; sourceTree = "<group>"; };
+		D59736F61FB6129F00FC99F2 /* VideoFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFeed.swift; sourceTree = "<group>"; };
 		D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFocusSquare.swift; sourceTree = "<group>"; };
 		D5BCF53A1FB3D6700057220F /* Onion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Onion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5BCF53D1FB3D6700057220F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -113,8 +113,8 @@
 			children = (
 				D5BCF53D1FB3D6700057220F /* AppDelegate.swift */,
 				D5BCF53F1FB3D6700057220F /* ViewController.swift */,
+				D59736F61FB6129F00FC99F2 /* VideoFeed.swift */,
 				D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */,
-				D59736F61FB6129F00FC99F2 /* FrameExtractor.swift */,
 				D58DFD941FBA2D3200D3C625 /* OpenCVWrapper.h */,
 				D58DFD951FBA2D3200D3C625 /* OpenCVWrapper.mm */,
 				D58DFD911FB9EFE900D3C625 /* opencv2.framework */,
@@ -292,7 +292,7 @@
 				D5BCF5401FB3D6700057220F /* ViewController.swift in Sources */,
 				D58DFD961FBA2D3200D3C625 /* OpenCVWrapper.mm in Sources */,
 				D5B007C81FB4B149000B160F /* CameraFocusSquare.swift in Sources */,
-				D59736F71FB6129F00FC99F2 /* FrameExtractor.swift in Sources */,
+				D59736F71FB6129F00FC99F2 /* VideoFeed.swift in Sources */,
 				D5BCF53E1FB3D6700057220F /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

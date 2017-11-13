@@ -9,10 +9,16 @@
 #import "OpenCVWrapper.h"
 #import <opencv2/opencv.hpp>
 
+//#define DEST_W 720  //540
+//#define DEST_H 960
+
+#define DEST_W 540
+#define DEST_H 720
+
 using namespace std;
 using namespace cv;
 
-// Compare two images by getting the L2 error (square-root of sum of squared error).
+// Compare two images by getting the L2 error (squa(nonatomic) re-root of sum of squared error).
 double getSimilarity( const Mat A, const Mat B ) {
 	if ( A.rows > 0 && A.rows == B.rows && A.cols > 0 && A.cols == B.cols ) {
 		// Calculate the L2 relative error between images.
@@ -26,6 +32,11 @@ double getSimilarity( const Mat A, const Mat B ) {
 		return 100000000.0;  // Return a bad value
 	}
 }
+
+@interface OpenCVWrapper(){
+	Mat storedImageCV;
+}
+@end
 
 @implementation OpenCVWrapper
 
@@ -122,8 +133,26 @@ double getSimilarity( const Mat A, const Mat B ) {
 	return [self UIImageFromCVMat:gray];
 }
 
+-(void) setStoredImage:(UIImage *)storedImage{
+	_storedImage = storedImage;
+	cv::Size size(DEST_W, DEST_H);
+	resize([self cvMatFromUIImage:storedImage], storedImageCV, size);
+}
+
+-(UIImage *) differenceWithStoredImage:(UIImage*)image{
+	cv::Size size(DEST_W, DEST_H);
+
+//	Mat input = [self cvMatFromUIImage:image];
+	Mat input;
+	resize([self cvMatFromUIImage:image], input, size);
+
+	Mat difference;
+	absdiff(input, storedImageCV, difference);
+	return [self UIImageFromCVMat:difference];
+}
 
 -(UIImage *) differenceBetween:(UIImage*)image1 and:(UIImage*)image2{
+	cout << image1.size.width << " == " << image2.size.width << endl;
 	Mat input1 = [self cvMatFromUIImage:image1];
 	Mat input2 = [self cvMatFromUIImage:image2];
 	Mat difference;

@@ -1,15 +1,15 @@
 import UIKit
 import AVFoundation
 
-protocol FrameExtractorDelegate: class {
+protocol VideoFeedDelegate: class {
 	func frame(image: UIImage)
 	func captured(image: UIImage)
 }
 
-class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
+class VideoFeed: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
 	
 	private let position = AVCaptureDevice.Position.back
-	private let quality = AVCaptureSession.Preset.medium
+	private let quality = AVCaptureSession.Preset.photo
 	
 	private var permissionGranted = false
 	private let sessionQueue = DispatchQueue(label: "session queue")
@@ -19,7 +19,7 @@ class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, AV
 	var previewLayer: AVCaptureVideoPreviewLayer!
 	var cameraOutput:AVCapturePhotoOutput!
 
-	weak var delegate: FrameExtractorDelegate?
+	weak var delegate: VideoFeedDelegate?
 	
 	override init() {
 		super.init()
@@ -59,12 +59,10 @@ class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, AV
 		guard captureSession.canAddInput(captureDeviceInput) else { return }
 		captureSession.addInput(captureDeviceInput)
 
-		
 		cameraOutput = AVCapturePhotoOutput()
 		guard captureSession.canAddOutput(cameraOutput) else { return }
 		captureSession.addOutput(cameraOutput)
 
-		
 		let videoOutput = AVCaptureVideoDataOutput()
 		videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "sample buffer"))
 		guard captureSession.canAddOutput(videoOutput) else { return }
@@ -74,7 +72,6 @@ class FrameExtractor: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, AV
 		guard connection.isVideoMirroringSupported else { return }
 		connection.videoOrientation = .portrait
 		connection.isVideoMirrored = position == .front
-
 	}
 	
 	private func selectCaptureDevice() -> AVCaptureDevice? {
