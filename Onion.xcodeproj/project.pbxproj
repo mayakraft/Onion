@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D58DFD921FB9EFE900D3C625 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D58DFD911FB9EFE900D3C625 /* opencv2.framework */; };
+		D59736F71FB6129F00FC99F2 /* FrameExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59736F61FB6129F00FC99F2 /* FrameExtractor.swift */; };
 		D5B007C81FB4B149000B160F /* CameraFocusSquare.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */; };
 		D5BCF53E1FB3D6700057220F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BCF53D1FB3D6700057220F /* AppDelegate.swift */; };
 		D5BCF5401FB3D6700057220F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BCF53F1FB3D6700057220F /* ViewController.swift */; };
@@ -35,6 +37,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D58DFD911FB9EFE900D3C625 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
+		D59736F61FB6129F00FC99F2 /* FrameExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameExtractor.swift; sourceTree = "<group>"; };
 		D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraFocusSquare.swift; sourceTree = "<group>"; };
 		D5BCF53A1FB3D6700057220F /* Onion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Onion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5BCF53D1FB3D6700057220F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -58,6 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D58DFD921FB9EFE900D3C625 /* opencv2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -105,6 +110,8 @@
 				D5BCF53D1FB3D6700057220F /* AppDelegate.swift */,
 				D5BCF53F1FB3D6700057220F /* ViewController.swift */,
 				D5B007C71FB4B149000B160F /* CameraFocusSquare.swift */,
+				D59736F61FB6129F00FC99F2 /* FrameExtractor.swift */,
+				D58DFD911FB9EFE900D3C625 /* opencv2.framework */,
 				D5BCF5411FB3D6700057220F /* Main.storyboard */,
 				D5BCF5441FB3D6700057220F /* Assets.xcassets */,
 				D5BCF5461FB3D6700057220F /* LaunchScreen.storyboard */,
@@ -276,6 +283,7 @@
 			files = (
 				D5BCF5401FB3D6700057220F /* ViewController.swift in Sources */,
 				D5B007C81FB4B149000B160F /* CameraFocusSquare.swift in Sources */,
+				D59736F71FB6129F00FC99F2 /* FrameExtractor.swift in Sources */,
 				D5BCF53E1FB3D6700057220F /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -444,6 +452,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 78C98TD784;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Onion",
+				);
 				INFOPLIST_FILE = Onion/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -460,6 +472,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 78C98TD784;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Onion",
+				);
 				INFOPLIST_FILE = Onion/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
